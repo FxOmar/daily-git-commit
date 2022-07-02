@@ -2,9 +2,13 @@
   "name": "daily-git-commit",
   "version": "1.0.0",
   "description": "",
+  "bin": {
+    "daily-git-commit": "./bin/index.js"
+  },
   "scripts": {
     "dev": "nodemon --config nodemon.json src/index.ts",
     "dev:debug": "nodemon --config nodemon.json --inspect-brk src/index.ts",
+    "build": "tsc",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
@@ -19,5 +23,8 @@
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "prompt": "^1.3.0"
   }
 }
