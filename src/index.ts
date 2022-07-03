@@ -4,6 +4,16 @@ const { execSync } = require("node:child_process");
 import fs from "fs";
 import path from "path";
 
+// Automatically run http server after user has finished entering the required inputs.
+
+// // Create an instance of the http server.
+// let app = require("http").createServer();
+
+// // Start the server on port 3000
+// app.listen(3000, "127.0.0.1");
+
+// console.log("Node server running on port 3000");
+
 // const prompt = require("prompt");
 
 // const schema = {
@@ -83,11 +93,18 @@ function createFolder(folder: string, where: string): string {
  *
  * @param where location to create the folders.
  * @param folder name of the folder.
+ *
+ * @throws if the folder does not exist.
+ *
  * @returns path of the folder.
  *
  * @example getFolderPath("/Users/user/", "folder") => "/Users/user/folder"
  **/
-function getFolderPath(where: string = __dirname, folder: string) {
+function getFolderPath(where: string = __dirname, folder: string): string {
+  if (!fs.existsSync(where)) {
+    throw new Error(`Folder ${where} does not exist.`);
+  }
+
   return path.join(where, folder);
 }
 
@@ -99,10 +116,12 @@ function getFolderPath(where: string = __dirname, folder: string) {
 function initGitRepository(where: string): void {
   const repoURL = "git@github.com:FxOmar/random-repo.git";
 
+  // Create a git repository.
+  // push to github.
   cmd(
     `
     git init && git remote add origin ${repoURL} &&
-    echo "${new Date()}" >> README.md &&
+    echo "${new Date().toString()}" >> README.md &&
     git add README.md &&
     git commit -m "Initial commit" &&
     git push --force --set-upstream origin master`,
@@ -110,9 +129,28 @@ function initGitRepository(where: string): void {
   );
 }
 
+/**
+ * Edit a file.
+ *
+ * @param fileName name of the file to edit.
+ * @param where location to create the folders.
+ */
+async function editFile(fileName: string, where: string): Promise<void> {
+  const filePath = getFolderPath(where, fileName);
+
+  const file = fs.readFileSync(filePath, "utf8");
+
+  // Replace current file date with a new date.
+  const newFile = file.replace(file, new Date().toString());
+  fs.writeFileSync(filePath, newFile);
+}
+
 function run() {
   const folderPath = createFolder("test", "/Users/fx_omar/Desktop/");
+
   initGitRepository(folderPath);
+
+  editFile("README.md", folderPath);
 }
 
 run();
