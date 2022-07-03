@@ -56,33 +56,6 @@ function cmd(command: string, where: string) {
 }
 
 /**
- * Create a folders.
- *
- * @param folders array of folders to create.
- * @param where location to create the folders.
- *
- * @returns folders paths that were created.
- */
-function createFolders(
-  folders: string[] | string,
-  where: string
-): Array<string> {
-  const folderPaths: string[] = [];
-
-  if (typeof folders === "string") {
-    folders = [folders];
-  }
-
-  folders.forEach((folder: string) => {
-    const folderPath = createFolder(folder, where);
-
-    folderPaths.push(folderPath);
-  });
-
-  return folderPaths;
-}
-
-/**
  * Create a folder.
  *
  * @param folder name of the folder to create.
