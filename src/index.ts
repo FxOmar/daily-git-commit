@@ -1,10 +1,9 @@
 #! /usr/bin/env node
-const { spawn } = require("node:child_process");
+const { execSync } = require("node:child_process");
 
 import fs from "fs";
 import path from "path";
 
-// Handles user input and calls the appropriate function
 // const prompt = require("prompt");
 
 // const schema = {
@@ -42,13 +41,18 @@ import path from "path";
  * @returns Promise that resolves to the output of the command
  */
 function cmd(command: string, where: string) {
-  const cmd = spawn(command, { cwd: where });
+  return execSync(
+    command,
+    { cwd: where, detached: true },
+    (err: any, res: any) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
 
-  cmd.stdout.on("data", (data: any) => {
-    console.log(data.toString());
-  });
-
-  return cmd;
+      console.log(`Successfully executed command: ${command}`);
+    }
+  );
 }
 
 /**
@@ -59,7 +63,10 @@ function cmd(command: string, where: string) {
  *
  * @returns folders paths that were created.
  */
-function createFolders(folders: string[] | string, where: string) {
+function createFolders(
+  folders: string[] | string,
+  where: string
+): Array<string> {
   const folderPaths: string[] = [];
 
   if (typeof folders === "string") {
@@ -86,7 +93,7 @@ function createFolders(folders: string[] | string, where: string) {
  * @throws if the folder already exists.
  *
  **/
-function createFolder(folder: string, where: string) {
+function createFolder(folder: string, where: string): string {
   const folderPath = getFolderPath(where, folder);
 
   if (!fs.existsSync(folderPath)) {
@@ -111,6 +118,28 @@ function getFolderPath(where: string = __dirname, folder: string) {
   return path.join(where, folder);
 }
 
-const sss = createFolders(["hello", "world", "WTF"], "/Users/fx_omar/Desktop");
+/**
+ * init git repository.
+ *
+ * @param where location to create the folders.
+ */
+function initGitRepository(where: string): void {
+  const repoURL = "git@github.com:FxOmar/random-repo.git";
 
-console.log(sss);
+  cmd(
+    `
+    git init && git remote add origin ${repoURL} &&
+    echo "${new Date()}" >> README.md &&
+    git add README.md &&
+    git commit -m "Initial commit" &&
+    git push --force --set-upstream origin master`,
+    where
+  );
+}
+
+function run() {
+  const folderPath = createFolder("test", "/Users/fx_omar/Desktop/");
+  initGitRepository(folderPath);
+}
+
+run();
