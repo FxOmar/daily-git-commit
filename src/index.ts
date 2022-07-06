@@ -1,4 +1,3 @@
-#! /usr/bin/env ts-node
 const { execSync } = require("node:child_process");
 
 import fs from "fs";
