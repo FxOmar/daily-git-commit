@@ -113,12 +113,12 @@ function getFolderPath(where: string = __dirname, folder: string): string {
  *
  * @param where location to create the folders.
  */
-function initGitRepository(where: string): void {
+async function initGitRepository(where: string) {
   const repoURL = "git@github.com:FxOmar/random-repo.git";
 
   // Create a git repository.
   // push to github.
-  cmd(
+  return await cmd(
     `
     git init && git remote add origin ${repoURL} &&
     echo "${new Date().toString()}" >> README.md &&
@@ -134,23 +134,77 @@ function initGitRepository(where: string): void {
  *
  * @param fileName name of the file to edit.
  * @param where location to create the folders.
+ * @param content content to write to the file.
+ * @param append if true, append the content to the file.
  */
-async function editFile(fileName: string, where: string): Promise<void> {
+async function editFile(
+  fileName: string,
+  where: string,
+  content: string,
+  append: boolean = false
+): Promise<void> {
   const filePath = getFolderPath(where, fileName);
+
+  if (append) {
+    fs.appendFileSync(filePath, content, "utf8");
+    return;
+  }
 
   const file = fs.readFileSync(filePath, "utf8");
 
   // Replace current file date with a new date.
-  const newFile = file.replace(file, new Date().toString());
+  const newFile = file.replace(file, content);
   fs.writeFileSync(filePath, newFile);
 }
 
-function run() {
-  const folderPath = createFolder("test", "/Users/fx_omar/Desktop/");
+async function run() {
+  // if this function runs the first time initGitRepository,
+  // and create new log file to keep track of the changes.
+  // if this function runs again, edit the log file.
+  // and edit README.md file and push changes to Github.
 
-  initGitRepository(folderPath);
+  let folderPath: string;
 
-  editFile("README.md", folderPath);
+  const logFilePath = getFolderPath(__dirname, "log.txt");
+
+  // Check if log file exists.
+  if (!fs.existsSync(logFilePath)) {
+    folderPath = createFolder("test", "/Users/fx_omar/Desktop/");
+
+    const gitLog = initGitRepository(folderPath);
+
+    // Create a log file to keep track of the script.
+    fs.writeFileSync(
+      logFilePath,
+      `${gitLog}\n
+      ${new Date().toString()} - ${folderPath} created successfully.\n`,
+      "utf8"
+    );
+  } else {
+    folderPath = getFolderPath("/Users/fx_omar/Desktop/", "test");
+
+    const numberOfCommitsEveryday = 3;
+
+    // Edit README.md file and push changes to Github.
+    // Edit log file with the changes.
+    for (let i = 0; i <= numberOfCommitsEveryday - 1; i++) {
+      await editFile("README.md", folderPath, new Date().toString());
+
+      await cmd(
+        `git add . && git commit -m "Commit ${new Date().toString()}" && git push`,
+        folderPath
+      );
+
+      await editFile(
+        "log.txt",
+        __dirname,
+        `${new Date().toString()} - ${
+          folderPath + "/README.md"
+        } edited successfully.\n`,
+        true
+      );
+    }
+  }
 }
 
 run();

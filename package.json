@@ -8,19 +8,18 @@
   "scripts": {
     "dev": "nodemon --config nodemon.json src/index.ts",
     "dev:debug": "nodemon --config nodemon.json --inspect-brk src/index.ts",
+    "run:script": "pm2 start bin/index.js --name daily-git-commit --no-autorestart --cron-restart='1 * * * *'",
     "build": "tsc",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "",
+  "author": "Omar Chadidi",
   "license": "ISC",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
-    "@types/jest": "^28.1.3",
     "@types/node": "^18.0.0",
-    "jest": "^28.1.2",
+    "@types/node-cron": "^3.0.2",
     "nodemon": "^2.0.18",
-    "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.4"
   },
